@@ -1,4 +1,4 @@
-package mntp
+package mqtttimer
 
 import (
 	"encoding/json"
@@ -38,4 +38,12 @@ func SetSystemDate(newTime time.Time) error {
 		return errors.New("settimeofday: " + err.Error())
 	}
 	return nil
+}
+
+func Adjtime(delta int64) error {
+	var (
+		intval = syscall.NsecToTimeval(delta)
+		oldval = syscall.Timeval{}
+	)
+	return syscall.Adjtime(&intval, &oldval)
 }

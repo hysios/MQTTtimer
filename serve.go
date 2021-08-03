@@ -1,4 +1,4 @@
-package mntp
+package mqtttimer
 
 import (
 	"path"

@@ -1,7 +1,8 @@
-package mntp
+package mqtttimer
 
 import (
 	"io"
+	"math"
 	"path"
 	"time"
 
@@ -26,7 +27,7 @@ type NtpPackage struct {
 	Time           time.Time
 }
 
-func NewNTP(m mqtt.Client) *Client {
+func NewTimer(m mqtt.Client) *Client {
 	return &Client{
 		Prefix:      DefaultPrefix,
 		WaitTimeout: DefaultTimeout,
@@ -43,16 +44,24 @@ func (client *Client) Sync() error {
 	)
 
 	client.mqClient.Subscribe(client.Topic("sessions", sessid), 0, func(c mqtt.Client, m mqtt.Message) {
-		var t = now()
-		p := unpack(m.Payload())
+		var (
+			t = now()
+			p = unpack(m.Payload())
+		)
 		p.T3 = t.UnixNano()
 		offset := ((p.T1 - p.T0) + (p.T2 - p.T3)) / 2
-		t1 := p.T0 + offset
-		nt := time.Unix(t1/1000000000, t1%10000000000)
-		log.Debugf("θ %d serve time %s", offset, p.Time)
-		log.Debugf("diff %s %s => %s", nt.Sub(t), t, nt)
-
-		SetSystemDate(nt)
+		if math.Abs(float64(offset)) < 500000000 {
+			Adjtime(offset)
+			nt := now()
+			log.Debugf("diff %s %s => %s", nt.Sub(t), t, nt)
+			log.Infof("adjtime %d", offset)
+		} else {
+			t1 := p.T0 + offset
+			nt := time.Unix(t1/1000000000, t1%10000000000)
+			SetSystemDate(nt)
+			log.Debugf("θ %d serve time %s", offset, p.Time)
+			log.Debugf("diff %s %s => %s", nt.Sub(t), t, nt)
+		}
 		c.Unsubscribe(client.Topic("sessions", sessid))
 		done <- true
 	})

@@ -1,10 +1,15 @@
-# MNTP is NTP over mqtt protocol.
+# MQTTTimer is based mqtt protocol sync timer.
 
 You can used ntp sync time protocol in IoT without ntp server.
 used mqtt protocol sync time is tcp connnections, and based mqtt protocol, so don't need a ntp server.
 and direct embed mqtt server side.
 
 # exmaples
+
+### Import 
+```go
+import timer "github.com/hysios/MQTTtimer"
+```
 
 ### Client Mode
 
@@ -24,7 +29,7 @@ and direct embed mqtt server side.
 	}
 
 	log.Printf("connect %s", addr)
-	client := mntp.NewNTP(mqClient)
+	client := timer.NewTimer(mqClient)
 	client.Sync()
 ```
 
@@ -44,7 +49,7 @@ and direct embed mqtt server side.
 		time.Sleep(5 * time.Second)
 		panic(token.Error())
 	}
-	s := mntp.NewServe(mqClient)
+	s := timer.NewServe(mqClient)
 	log.Printf("startup mntp server connect %s", addr)
 	s.Start()
 ```

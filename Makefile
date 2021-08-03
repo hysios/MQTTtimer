@@ -2,7 +2,7 @@ OS=linux darwin
 ARCHS=arm amd64
 APPS=client server
 BUILD_VERSION=$(shell git describe --tags)
-PACKAGE_NAME=github.com/hysios/mntp
+PACKAGE_NAME=github.com/hysios/MQTTtimer
 # VERSION_OPT=-X $(PACKAGE_NAME)/apps//cmd.Version=$(BUILD_VERSION)
 
 build:

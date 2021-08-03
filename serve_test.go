@@ -1,4 +1,4 @@
-package mntp
+package mqtttimer
 
 import (
 	"log"
@@ -32,7 +32,7 @@ func TestServer_Start(t *testing.T) {
 		defer s.Stop()
 	})
 	time.Sleep(10 * time.Millisecond)
-	cli := NewNTP(mockClient())
+	cli := NewTimer(mockClient())
 	err := cli.Sync()
 	assert.NoError(t, err)
 }

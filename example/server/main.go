@@ -5,10 +5,10 @@ import (
 	"os"
 	"time"
 
+	timer "github.com/hysios/MQTTtimer"
 	"github.com/hysios/log"
 
 	mqtt "github.com/eclipse/paho.mqtt.golang"
-	"github.com/hysios/mntp"
 )
 
 var (
@@ -38,7 +38,7 @@ func main() {
 		time.Sleep(5 * time.Second)
 		panic(token.Error())
 	}
-	s := mntp.NewServe(mqClient)
+	s := timer.NewServe(mqClient)
 	log.Infof("startup mntp server connect %s", addr)
 	s.Start()
 }

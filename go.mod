@@ -1,4 +1,4 @@
-module github.com/hysios/mntp
+module github.com/hysios/MQTTtimer
 
 go 1.16
 

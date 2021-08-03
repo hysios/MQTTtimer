@@ -9,7 +9,7 @@ import (
 	"github.com/hysios/log"
 
 	mqtt "github.com/eclipse/paho.mqtt.golang"
-	"github.com/hysios/mntp"
+	timer "github.com/hysios/MQTTtimer"
 )
 
 var (
@@ -42,7 +42,7 @@ func main() {
 	}
 
 	log.Infof("connect %s", addr)
-	client := mntp.NewNTP(mqClient)
+	client := timer.NewTimer(mqClient)
 	client.Sync()
 
 	var tick = time.NewTicker(10 * time.Second)
