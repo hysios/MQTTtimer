@@ -39,11 +39,3 @@ func SetSystemDate(newTime time.Time) error {
 	}
 	return nil
 }
-
-func Adjtime(delta int64) error {
-	var (
-		intval = syscall.NsecToTimeval(delta)
-		oldval = syscall.Timeval{}
-	)
-	return syscall.Adjtime(&intval, &oldval)
-}

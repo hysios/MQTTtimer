@@ -7,4 +7,5 @@ require (
 	github.com/hysios/log v0.0.0-20210420091742-d54e2f0555dd // indirect
 	github.com/segmentio/ksuid v1.0.4 // indirect
 	github.com/tj/assert v0.0.3 // indirect
+	golang.org/x/sys v0.0.0-20200323222414-85ca7c5b95cd // indirect
 )
