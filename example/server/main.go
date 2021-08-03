@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"os"
 	"time"
 
 	"github.com/hysios/log"
@@ -15,11 +16,15 @@ var (
 )
 
 func init() {
-	flag.StringVar(&addr, "addr", "tcp://120.79.85.236:1883", "mqtt server broker addr")
+	flag.StringVar(&addr, "addr", "", "mqtt server broker addr")
 }
 
 func main() {
 	flag.Parse()
+
+	if len(addr) == 0 {
+		addr = os.Getenv("SERVER_IP")
+	}
 
 	var (
 		opts     = mqtt.NewClientOptions().AddBroker(addr)
