@@ -2,6 +2,9 @@ package mntp
 
 import (
 	"encoding/json"
+	"errors"
+	"syscall"
+	"time"
 
 	"github.com/segmentio/ksuid"
 )
@@ -19,4 +22,20 @@ func unpack(b []byte) NtpPackage {
 	var p NtpPackage
 	json.Unmarshal(b, &p)
 	return p
+}
+
+func utc() time.Time {
+	return time.Now().UTC()
+}
+
+func now() time.Time {
+	return time.Now()
+}
+
+func SetSystemDate(newTime time.Time) error {
+	tv := syscall.NsecToTimeval(newTime.UnixNano())
+	if err := syscall.Settimeofday(&tv); err != nil {
+		return errors.New("settimeofday: " + err.Error())
+	}
+	return nil
 }

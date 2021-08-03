@@ -2,9 +2,10 @@ package mntp
 
 import (
 	"io"
-	"log"
 	"path"
 	"time"
+
+	"github.com/hysios/log"
 
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 )
@@ -36,25 +37,27 @@ func NewNTP(m mqtt.Client) *Client {
 func (client *Client) Sync() error {
 	var (
 		sessid = UID()
-		t      = time.Now()
+		t      = now()
 		pkt    = NtpPackage{T0: t.UnixNano()}
 		done   = make(chan bool)
 	)
 
 	client.mqClient.Subscribe(client.Topic("sessions", sessid), 0, func(c mqtt.Client, m mqtt.Message) {
-		var t = time.Now()
+		var t = now()
 		p := unpack(m.Payload())
 		p.T3 = t.UnixNano()
 		offset := ((p.T1 - p.T0) + (p.T2 - p.T3)) / 2
-		t1 := p.T1 + offset
+		t1 := p.T0 + offset
 		nt := time.Unix(t1/1000000000, t1%10000000000)
-		log.Printf("offset %v %s => %s", offset, p.Time, nt)
+		log.Debugf("θ %d serve time %s", offset, p.Time)
+		log.Debugf("diff %s %s => %s", nt.Sub(t), t, nt)
 
+		SetSystemDate(nt)
 		c.Unsubscribe(client.Topic("sessions", sessid))
 		done <- true
 	})
 
-	log.Printf("pack %s", pack(pkt))
+	log.Debugf("ts %d pack %s", t.UnixNano()/1000000, pack(pkt))
 	token := client.mqClient.Publish(client.Topic("synctime", sessid), 0, false, pack(pkt))
 	token.Wait()
 
@@ -70,6 +73,6 @@ func (client *Client) Sync() error {
 
 func (client *Client) Topic(suffix ...string) string {
 	ps := append([]string{client.Prefix}, suffix...)
-	log.Printf("topic %s", path.Join(ps...))
+	log.Debugf("topic %s", path.Join(ps...))
 	return path.Join(ps...)
 }
