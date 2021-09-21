@@ -11,6 +11,7 @@ import (
 
 type Server struct {
 	Prefix   string
+	UseUTC   bool
 	mqClient mqtt.Client
 	done     chan bool
 }
@@ -19,16 +20,24 @@ func NewServe(m mqtt.Client) *Server {
 	return &Server{Prefix: DefaultPrefix, mqClient: m, done: make(chan bool)}
 }
 
+func (s *Server) now() time.Time {
+	if s.UseUTC {
+		return utc()
+	} else {
+		return now()
+	}
+}
+
 func (s *Server) Start() error {
 	s.mqClient.Subscribe(s.Topic("synctime/+"), 0, func(c mqtt.Client, m mqtt.Message) {
 		var (
-			t      = now()
+			t      = s.now()
 			sessid = path.Base(m.Topic())
 			p      = unpack(m.Payload())
 		)
 		defer m.Ack()
 		p.T1 = t.UnixNano()
-		p.Time = now()
+		p.Time = s.now()
 		time.Sleep(2 * time.Millisecond)
 		p.T2 = utc().UnixNano()
 		log.Debugf("time %s", t)

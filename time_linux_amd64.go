@@ -13,3 +13,11 @@ func Adjtime(delta int64) error {
 	}
 	return err
 }
+
+func SetSystemDate(newTime time.Time) error {
+	tv := syscall.NsecToTimeval(newTime.UnixNano())
+	if err := syscall.Settimeofday(&tv); err != nil {
+		return errors.New("settimeofday: " + err.Error())
+	}
+	return nil
+}

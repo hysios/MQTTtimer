@@ -2,8 +2,6 @@ package mqtttimer
 
 import (
 	"encoding/json"
-	"errors"
-	"syscall"
 	"time"
 
 	"github.com/segmentio/ksuid"
@@ -30,12 +28,4 @@ func utc() time.Time {
 
 func now() time.Time {
 	return time.Now()
-}
-
-func SetSystemDate(newTime time.Time) error {
-	tv := syscall.NsecToTimeval(newTime.UnixNano())
-	if err := syscall.Settimeofday(&tv); err != nil {
-		return errors.New("settimeofday: " + err.Error())
-	}
-	return nil
 }
