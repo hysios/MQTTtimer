@@ -1,6 +1,11 @@
 package mqtttimer
 
-import "golang.org/x/sys/unix"
+import (
+	"errors"
+	"golang.org/x/sys/unix"
+	"syscall"
+	"time"
+)
 
 func Adjtime(delta int64) error {
 	var buf unix.Timex

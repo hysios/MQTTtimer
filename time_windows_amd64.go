@@ -1,6 +1,10 @@
 package mqtttimer
 
-import "github.com/jcollie/w32"
+import (
+	"errors"
+	"github.com/jcollie/w32"
+	"time"
+)
 
 func SetSystemDate(newTime time.Time) error {
 	return w32.SetSystemTime(w32.SystemTime{
