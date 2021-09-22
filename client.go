@@ -87,13 +87,13 @@ func (client *Client) Sync() error {
 		done <- true
 	})
 
-	token.Wait()
+	token.WaitTimeout(30 * time.Second)
 
 	for i := 0; i < client.MaxRetry; i++ {
 
 		log.Debugf("ts %d pack %s", t.UnixNano()/1000000, pack(pkt))
 		token := client.mqClient.Publish(client.Topic("synctime", sessid), 2, false, pack(pkt))
-		token.Wait()
+		token.WaitTimeout(30 * time.Second)
 
 		select {
 		case <-done:
