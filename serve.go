@@ -29,7 +29,7 @@ func (s *Server) now() time.Time {
 }
 
 func (s *Server) Start() error {
-	s.mqClient.Subscribe(s.Topic("synctime/+"), 0, func(c mqtt.Client, m mqtt.Message) {
+	s.mqClient.Subscribe(s.Topic("synctime/+"), 2, func(c mqtt.Client, m mqtt.Message) {
 		var (
 			t      = s.now()
 			sessid = path.Base(m.Topic())
@@ -41,7 +41,7 @@ func (s *Server) Start() error {
 		time.Sleep(2 * time.Millisecond)
 		p.T2 = utc().UnixNano()
 		log.Debugf("time %s", t)
-		s.mqClient.Publish(s.Topic("sessions", sessid), 0, false, pack(p))
+		s.mqClient.Publish(s.Topic("sessions", sessid), 2, false, pack(p))
 	})
 
 	select {
