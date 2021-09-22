@@ -53,7 +53,7 @@ func (client *Client) Sync() error {
 		done   = make(chan bool)
 	)
 
-	client.mqClient.Subscribe(client.Topic("sessions", sessid), 0, func(c mqtt.Client, m mqtt.Message) {
+	client.mqClient.Subscribe(client.Topic("sessions", sessid), 2, func(c mqtt.Client, m mqtt.Message) {
 		var (
 			t = client.now()
 			p = unpack(m.Payload())
@@ -85,7 +85,7 @@ func (client *Client) Sync() error {
 	})
 
 	log.Debugf("ts %d pack %s", t.UnixNano()/1000000, pack(pkt))
-	token := client.mqClient.Publish(client.Topic("synctime", sessid), 0, false, pack(pkt))
+	token := client.mqClient.Publish(client.Topic("synctime", sessid), 2, false, pack(pkt))
 	token.Wait()
 
 	select {
