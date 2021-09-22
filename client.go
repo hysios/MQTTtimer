@@ -13,13 +13,15 @@ import (
 )
 
 var (
-	DefaultPrefix  = "MNTP"
-	DefaultTimeout = 15 * time.Second
+	DefaultPrefix   = "MNTP"
+	DefaultTimeout  = 15 * time.Second
+	DefaultMaxRetry = 3
 )
 
 type Client struct {
 	Prefix      string
 	WaitTimeout time.Duration
+	MaxRetry    int
 	UseUTC      bool
 	mqClient    mqtt.Client
 }
@@ -33,6 +35,7 @@ func NewTimer(m mqtt.Client) *Client {
 	return &Client{
 		Prefix:      DefaultPrefix,
 		WaitTimeout: DefaultTimeout,
+		MaxRetry:    DefaultMaxRetry,
 		mqClient:    m,
 	}
 }
@@ -53,7 +56,7 @@ func (client *Client) Sync() error {
 		done   = make(chan bool)
 	)
 
-	client.mqClient.Subscribe(client.Topic("sessions", sessid), 2, func(c mqtt.Client, m mqtt.Message) {
+	token := client.mqClient.Subscribe(client.Topic("sessions", sessid), 2, func(c mqtt.Client, m mqtt.Message) {
 		var (
 			t = client.now()
 			p = unpack(m.Payload())
@@ -84,15 +87,23 @@ func (client *Client) Sync() error {
 		done <- true
 	})
 
-	log.Debugf("ts %d pack %s", t.UnixNano()/1000000, pack(pkt))
-	token := client.mqClient.Publish(client.Topic("synctime", sessid), 2, false, pack(pkt))
 	token.Wait()
 
-	select {
-	case <-done:
-		return nil
-	case <-time.After(client.WaitTimeout):
-		client.mqClient.Unsubscribe(client.Topic("sessions", sessid))
+	for i := 0; i < client.MaxRetry; i++ {
+
+		log.Debugf("ts %d pack %s", t.UnixNano()/1000000, pack(pkt))
+		token := client.mqClient.Publish(client.Topic("synctime", sessid), 2, false, pack(pkt))
+		token.Wait()
+
+		select {
+		case <-done:
+			return nil
+		case <-time.After(client.WaitTimeout):
+			if i == client.MaxRetry-1 {
+				client.mqClient.Unsubscribe(client.Topic("sessions", sessid))
+				break
+			}
+		}
 	}
 
 	return io.EOF
