@@ -83,7 +83,8 @@ func (client *Client) Sync() error {
 						if rtc, err := NewRTC(client.RTCDev); err != nil {
 							log.Errorf("rtc %s", err)
 						} else {
-							rtc.SetTime(nt)
+							log.Infof("set rtc time %v", rtc.SetTime(nt))
+							rtc.Close()
 						}
 					}
 				}
