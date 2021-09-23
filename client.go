@@ -22,6 +22,7 @@ type Client struct {
 	Prefix      string
 	WaitTimeout time.Duration
 	UseUTC      bool
+	RTCDev      string
 	mqClient    mqtt.Client
 }
 
@@ -77,6 +78,15 @@ func (client *Client) Sync() error {
 				t1 := p.T0 + offset
 				nt := time.Unix(t1/1000000000, t1%10000000000)
 				SetSystemDate(nt)
+				if runtime.GOOS == "linux" {
+					if len(client.RTCDev) > 0 {
+						if rtc, err := NewRTC(client.RTCDev); err != nil {
+							log.Errorf("rtc %s", err)
+						} else {
+							rtc.SetTime(nt)
+						}
+					}
+				}
 				log.Debugf("θ %d serve time %s", offset, p.Time)
 				log.Debugf("diff %s %s => %s", nt.Sub(t), t, nt)
 			}
@@ -100,6 +110,10 @@ func (client *Client) Sync() error {
 	}
 
 	return io.EOF
+}
+
+func (client *Client) SetRTCDev(dev string) {
+	client.RTCDev = dev
 }
 
 func (client *Client) Topic(suffix ...string) string {
