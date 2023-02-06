@@ -7,7 +7,7 @@ import (
 )
 
 func SetSystemDate(newTime time.Time) error {
-	return w32.SetSystemTime(w32.SystemTime{
+	w32.SetSystemTime(w32.SystemTime{
 		Year:         newTime.Year(),
 		Month:        newTime.Month(),
 		Day:          newTime.Day(),
@@ -16,6 +16,7 @@ func SetSystemDate(newTime time.Time) error {
 		Second:       newTime.Second(),
 		Milliseconds: 0,
 	})
+	return nil
 }
 
 func Adjtime(delta int64) error {
