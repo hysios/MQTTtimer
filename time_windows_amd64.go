@@ -7,7 +7,7 @@ import (
 )
 
 func SetSystemDate(newTime time.Time) error {
-	w32.SetSystemTime(w32.SYSTEMTIME{
+	w32.SetSystemTime(&w32.SYSTEMTIME{
 		Year:         uint16(newTime.Year()),
 		Month:        uint16(newTime.Month()),
 		Day:          uint16(newTime.Day()),
